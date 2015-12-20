@@ -26,12 +26,9 @@ Simulation::Simulation( Point2d windowSize )
 	_world.addChild( xAxisEngine );
 
 	auto startEllipse = make_shared< WorldObject >();
-	startEllipse->Position = Point2d( 0, 500 );
+	startEllipse->Name = "ELLIPSE";
+	startEllipse->Position = Point2d( 0, _world.getPhysicProperties().MeterToPixel *10 );
 	_world.addChild(startEllipse);
-
-
-	auto rigidbody = unique_ptr< Rigidbody >(new Rigidbody(startEllipse, 1.f));
-	startEllipse->addComponent( move(rigidbody) );
 
 	// creating renderable axises
 	auto yLineRender = make_shared< Line >(Point2d(0, windowSize.y - 110), RGB(34, 87, 21), yAxisEngine);
@@ -92,7 +89,32 @@ Simulation::Simulation( Point2d windowSize )
 		notch.NotchObj->Position = Point2d(props.MeterToPixel * i, -notchLength / 2.f);
 		notch.TextObj->Position = Point2d(-notchLength - 10, notch.LineRend->getHeight());
 	}
+
+
 	
+	auto aabbElipse = AABB{ Point2d(40, 40) };
+
+	auto colliderObj = make_shared< WorldObject >();
+	colliderObj->Position = -(aabbElipse.Size / 2);
+	startEllipse->addChild(colliderObj);
+
+	auto collider = unique_ptr< Collider<AABB> >(new Collider<AABB>(startEllipse, aabbElipse));
+	//colliderObj->addComponent(move(collider));
+
+
+	auto rigidbody = unique_ptr< Rigidbody >(new Rigidbody(startEllipse, 1.f, move(collider) ));
+	rigidbody->addVelocity(Point2d(10, 0));
+	startEllipse->addComponent(move(rigidbody));
+	
+
+	auto ySize = 50;
+	auto groundPlaneObj = make_shared< WorldObject >();
+	groundPlaneObj->Position = Point2d( -60, -ySize );
+	_world.addChild(groundPlaneObj);
+
+	auto groundBB = AABB{ Point2d(windowSize.x, ySize) };
+	auto aabbGround = unique_ptr< Collider<AABB> >(new Collider<AABB>(groundPlaneObj, groundBB));
+	groundPlaneObj->addComponent( move(aabbGround) );
 }
 
 void Simulation::run( HWND window, std::shared_ptr<bool> run )

@@ -12,21 +12,37 @@
 namespace Engine
 {
 	
+	struct ColliderListener
+	{
+		virtual void onCollisionStart(Point2d collisionVector){};
+		virtual void onCollisionEnd(){};
+		virtual void onStayInCollision(Point2d collisionVector){};
+
+		virtual ~ColliderListener()
+		{
+		}
+	};
 
 	struct World;
+	struct CollisionController;
+
 	template < class TShape >
 	struct Collider : public IComponent
 	{
+		friend struct CollisionController;
 		Collider(ObjPtr obj, TShape shape );
 		
 		TShape getShape();
 		WorldObjectPtr getObject();
+
+		void setListener( ColliderListener* listener );
 
 		virtual void onAddedToWorld(World *);
 		virtual void onRemovedFromWorld(World*);
 
 	private:
 		TShape _shape;
+		ColliderListener* _listener = nullptr;
 	};
 
 
@@ -37,8 +53,9 @@ namespace Engine
 		
 		void update(float dt);
 
-#define SHAPE_SUPPORT(Shape, Name)\
+#define SHAPE_SUPPORT(Shape, Name, TrackingName)\
 	private:\
+	std::set< std::pair< Collider<Shape>*, Collider<Shape>* > > TrackingName;\
 	std::set< Collider< Shape > *> Name;\
 	public:\
 		void addCollider( Collider< Shape >* collider )\
@@ -57,20 +74,24 @@ namespace Engine
 			}\
 		}\
 	private:\
-	bool checkCollision(WorldObjectPtr, WorldObjectPtr, Shape, Shape );\
+	bool checkCollision(WorldObjectPtr, WorldObjectPtr, Shape, Shape, Point2d& collisionVector ); \
 
 
-		SHAPE_SUPPORT(Circle, _cirles);
-		SHAPE_SUPPORT(Square, _squares );
+		//SHAPE_SUPPORT(Circle, _cirles, _circlesTracked);
+		SHAPE_SUPPORT(AABB, _aabbs, _aabbsTracked );
 
-	private:
-		bool checkCollision(WorldObjectPtr, WorldObjectPtr, Circle, Square );
+	private:		
+		template< class TLShape, class TRShape >
+		void trackCollisionState( Collider<TLShape>* lhs, Collider<TRShape>* rhs, 
+			std::set< std::pair<Collider<TLShape>*, Collider<TRShape>*> >& trackingSet,
+			bool inCollision );
 
 	private:
 		World* _world;
 		FuncPtr _updateCallback;
 	};
 }
+
 
 #include "ColliderImpl.hpp"
 

@@ -2,14 +2,17 @@
 #define _SHAPES_H_
 
 
+#include "PhysicsDll.h"
+#include "Point2d.h"
+
 namespace Engine
 {
-	struct Square 
+	struct PHYS_API AABB 
 	{
-
+		Point2d Size;
 	};
 
-	struct Circle 
+	struct PHYS_API Circle
 	{
 
 	};

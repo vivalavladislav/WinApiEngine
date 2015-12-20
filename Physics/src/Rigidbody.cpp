@@ -6,11 +6,7 @@
 
 namespace Engine
 {
-	Rigidbody::Rigidbody(ObjPtr obj, float mass )
-		: UpdatableComponent(obj), _mass( mass )
-	{
-	}
-
+	
 	void Rigidbody::update(float dt)
 	{
 		if (Object.expired())
@@ -22,8 +18,32 @@ namespace Engine
 		auto props = obj->getWorld()->getPhysicProperties();
 		_velocity = _velocity + props.Gravity * _mass * dt;
 		
+
+		if (_friction)
+		{
+			_velocity.x -= _velocity.x * dt;
+		}
 		// converting physical velocity to meters
-		obj->Position = obj->Position + _velocity / props.PixelToMeter * dt;
+		_lastPosAdded = _velocity / props.PixelToMeter * dt;
+		obj->Position = obj->Position + _lastPosAdded;
+	}
+
+	void Rigidbody::addVelocity(Point2d velocity)
+	{
+		_velocity = _velocity + velocity;
+	}
+
+
+	void Rigidbody::onCollisionStart(Point2d collision)
+	{
+		_friction = true;
+		_velocity.y = -_velocity.y/2;
+	}
+
+
+	void Rigidbody::onCollisionEnd()
+	{
+		_friction = false;
 	}
 
 }

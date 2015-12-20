@@ -40,6 +40,54 @@ namespace Engine
 		}
 		world->getCollisionController().addCollider(this);
 	}
+
+	template < class TShape >
+	void Collider<TShape>::setListener(ColliderListener* listener)
+	{
+		_listener = listener;
+	}
+
+
+	template< class TLShape, class TRShape >
+	void CollisionController::trackCollisionState(Collider<TLShape>* lhs, Collider<TRShape>* rhs,
+		std::set< std::pair<Collider<TLShape>*, Collider<TRShape>*> >& trackingSet,
+		bool inCollision)
+	{
+		auto pair = std::make_pair(lhs, rhs);
+		if (inCollision)
+		{
+			if (trackingSet.find(pair) != trackingSet.end())
+			{
+				if ( lhs->_listener != nullptr )
+					lhs->_listener->onStayInCollision( Point2d::Zero );
+				if ( rhs->_listener != nullptr )
+					rhs->_listener->onStayInCollision( Point2d::Zero );
+			}
+			else
+			{
+				trackingSet.insert( pair );
+
+				if (lhs->_listener != nullptr)
+					lhs->_listener->onCollisionStart(Point2d::Zero);
+				if (rhs->_listener != nullptr)
+					rhs->_listener->onCollisionStart(Point2d::Zero);
+			}
+		}
+		else
+		{
+			auto iter = trackingSet.find(pair);
+			
+			if (iter != trackingSet.end())
+			{
+				if (lhs->_listener != nullptr)
+					lhs->_listener->onCollisionEnd();
+				if (rhs->_listener != nullptr)
+					rhs->_listener->onCollisionEnd();
+
+				trackingSet.erase( iter );
+			}
+		}
+	}
 }
 
 #endif //_COLLIDER_IMPL_H_

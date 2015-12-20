@@ -58,11 +58,11 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_UBISOFTTEST));
 
-	AllocConsole();
+	/*AllocConsole();
 	freopen("CONIN$", "r", stdin);
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
-
+	*/
 	auto run = make_shared< bool >(true);
 	thread simulationLoop(std::bind(&Simulation::run, &simulation, hWnd, run));
 

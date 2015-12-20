@@ -25,6 +25,8 @@ namespace Engine
 		
 		World* getWorld();
 
+		std::string Name;
+
 	protected:
 		virtual void onChildAdded(std::shared_ptr< WorldObject > );
 		virtual void onChildRemoved(std::shared_ptr< WorldObject > );
