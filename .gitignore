@@ -1,2 +1,4 @@
-./Debug/*
-./Physics/Debug/*
+Physics/Debug/
+Debug/
+UbisoftTest.opensdf
+ipch/ubisofttest-6c84d27f/ubisofttest-c3760be8.ipch
