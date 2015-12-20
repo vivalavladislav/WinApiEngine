@@ -3,7 +3,7 @@
 namespace Engine
 {
 	World::World(PhysicProperties properties)
-		: _props( properties )
+		: _props(properties), _collision( this )
 	{
 	}
 
@@ -15,6 +15,11 @@ namespace Engine
 	TimeUpdater& World::getUpdater()
 	{
 		return _updater;
+	}
+
+	CollisionController& World::getCollisionController()
+	{
+		return _collision;
 	}
 
 	void World::onChildAdded(WorldObjectPtr child)

@@ -12,11 +12,11 @@ namespace Engine
 	struct PHYS_API TimeUpdater
 	{
 		void update();
-		void registerUpdate(UpdatableComponent* component);
-		void unregisterUpdate(UpdatableComponent* component );
+		void registerUpdate(FuncPtr func );
+		void unregisterUpdate(FuncPtr func );
 
 	private:
-		std::set< UpdatableComponent*> _updatables;
+		std::set< FuncPtr > _updatables;
 
 		typedef std::chrono::time_point<std::chrono::system_clock> TimePoint;
 		TimePoint _lastUpdate;

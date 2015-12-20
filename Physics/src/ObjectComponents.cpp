@@ -33,7 +33,8 @@ namespace Engine
 		}
 
 		auto func = bind(&UpdatableComponent::update, this, placeholders::_1);
-		world->getUpdater().registerUpdate( this );
+		_updateCallback = make_shared<UpdateF>(func);
+		world->getUpdater().registerUpdate(_updateCallback);
 	}
 
 	void UpdatableComponent::onRemovedFromWorld(World* world)
@@ -43,8 +44,7 @@ namespace Engine
 			return;
 		}
 
-		auto func = bind(&UpdatableComponent::update, this, placeholders::_1);
-		world->getUpdater().unregisterUpdate( this );
+		world->getUpdater().unregisterUpdate(_updateCallback);
 	}
 
 	MoveUp::MoveUp(ObjPtr obj)

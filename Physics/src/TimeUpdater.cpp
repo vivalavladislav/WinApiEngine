@@ -25,25 +25,24 @@ namespace Engine
 
 		cout << "update, delta : " << delta.count() << endl;
 
-		for (auto updatable : _updatables)
+		for (auto iter : _updatables)
 		{
-			updatable->update(delta.count());
+			iter.get()->operator()(delta.count());
 		}
 		_lastUpdate = system_clock::now();
 	}
 
-	void TimeUpdater::registerUpdate(UpdatableComponent* component)
+	void TimeUpdater::registerUpdate(FuncPtr func )
 	{
-		auto iter = _updatables.find( component );
-		if (iter == _updatables.end())
+		if (_updatables.find(func) == _updatables.end())
 		{
-			_updatables.insert( component );
+			_updatables.insert( func );
 		}
 	}
 
-	void TimeUpdater::unregisterUpdate(UpdatableComponent* component)
+	void TimeUpdater::unregisterUpdate( FuncPtr func )
 	{
-		auto iter = _updatables.find(component);
+		auto iter = _updatables.find( func );
 		if (iter != _updatables.end())
 		{
 			_updatables.erase( iter );

@@ -5,7 +5,7 @@
 
 #include "ObjectComponent.h"
 #include "Point2d.h"
-
+#include "Colliders.h"
 
 namespace Engine
 {

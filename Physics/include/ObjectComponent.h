@@ -33,6 +33,9 @@ namespace Engine
 		virtual void onRemovedFromWorld(World*) override;
 
 		virtual void update( float dt ) = 0;
+
+	private:
+		FuncPtr _updateCallback;
 	};
 
 	struct PHYS_API MoveUp : public UpdatableComponent

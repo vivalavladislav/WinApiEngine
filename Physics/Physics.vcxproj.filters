@@ -38,6 +38,8 @@
     </ClInclude>
     <ClInclude Include="include\Colliders.h" />
     <ClInclude Include="include\ObjectComponent.h" />
+    <ClInclude Include="include\Shapes.h" />
+    <ClInclude Include="include\ColliderImpl.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Rigidbody.cpp">
@@ -56,6 +58,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ObjectComponents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Colliders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

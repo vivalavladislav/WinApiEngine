@@ -5,6 +5,7 @@
 #include "Object.h"
 #include "WorldObject.h"
 #include "TimeUpdater.h"
+#include "Colliders.h"
 
 
 namespace Engine
@@ -29,6 +30,7 @@ namespace Engine
 
 		TimeUpdater& getUpdater();
 		PhysicProperties getPhysicProperties();
+		CollisionController& getCollisionController();
 
 	protected:
 		virtual void onChildAdded(WorldObjectPtr child);
@@ -37,6 +39,7 @@ namespace Engine
 	private:
 		TimeUpdater _updater;
 		PhysicProperties _props;
+		CollisionController _collision;
 	};
 }
 
