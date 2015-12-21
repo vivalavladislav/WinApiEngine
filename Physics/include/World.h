@@ -24,6 +24,10 @@ namespace Engine
 		}
 	};
 
+	/*
+			Root of the simulation
+			Handles objects' hiearchy, update loop, collision controll and physic properties
+	*/
 	struct PHYS_API World : public Object< WorldObject >
 	{
 		World(PhysicProperties properites);
@@ -33,6 +37,7 @@ namespace Engine
 		CollisionController& getCollisionController();
 
 	protected:
+		// notify children that they are added to physic world
 		virtual void onChildAdded(WorldObjectPtr child);
 		virtual void onChildRemoved(WorldObjectPtr child);
 

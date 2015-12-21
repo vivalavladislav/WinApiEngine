@@ -1,22 +1,125 @@
 #include "stdafx.h"
-#include "UbisoftTest.h"
+#include "Simulation.h"
 #include "ObjectComponent.h"
 #include "Rigidbody.h"
 
 #include <chrono>
-
+#include <fstream>
 
 using namespace Engine;
 using namespace Render;
 using namespace std;
 
+struct Settings
+{
+	float Mass;
+	Point2d StartPoint;
+	Point2d VelocityVector;
+};
+
+auto readSettings = []( string fileName )
+{
+	Settings res;
+
+	ifstream file;
+	file.open( fileName );
+
+	string line;
+	while (getline(file, line))
+	{
+		if (line.find("mass:") != -1)
+		{
+			auto index = strlen("mass:");
+			res.Mass = stof( line.substr(index).c_str() );
+		}
+		if (line.find("start_point") != -1)
+		{
+			auto len = strlen("start_point:");
+			string raw = line.substr(len );
+
+			auto delim = strlen(raw.c_str());
+			if (raw.find(','))
+			{
+				delim = raw.find(',');
+			}
+
+			res.StartPoint.x = stof(raw.substr(0, delim));
+			if (delim != strlen(raw.c_str()))
+			{
+				res.StartPoint.y = stof(raw.substr(delim + 1));
+			}
+		}
+		if (line.find("velocity_vector:") != -1)
+		{
+			auto len = strlen("velocity_vector:");
+			string raw = line.substr(len);
+
+			auto delim = strlen(raw.c_str());
+			if (raw.find(','))
+			{
+				delim = raw.find(',');
+			}
+
+			res.VelocityVector.x = stof(raw.substr(0, delim));
+			if (delim != strlen(raw.c_str()))
+			{
+				res.VelocityVector.y = stof(raw.substr(delim + 1));
+			}
+		}
+	}
+	return res;
+};
+
+
 Simulation::Simulation( Point2d windowSize )
 // 20 pixels is one meter
 : _world(PhysicProperties{ 1/20.f })
 {
+	auto settings = readSettings("./settings.txt");
+
 	_world.Position = Point2d( 60, windowSize.y - 100 );
 	// swap y axis to make a standart look
 	_world.setLocalAxises(Point2d(1, -1));
+
+
+
+	// setting up physic object, it's components and renderable object
+	auto physicObject = make_shared< WorldObject >();
+	physicObject->Name = "ELLIPSE";
+	physicObject->Position = settings.StartPoint * _world.getPhysicProperties().MeterToPixel;
+	_world.addChild(physicObject);
+
+
+	auto physicRnd = make_shared< Render::Ellipse >(Point2d(40, 40), RGB(160, 18, 21), physicObject);
+	_renderables.push_back(physicRnd);
+
+	auto aabbElipse = AABB{ Point2d(40, 40) };
+
+	// physicObject's Position is center of AABB, thus we create an object for follider to be placed in 
+	// correct position
+	auto colliderObj = make_shared< WorldObject >();
+	colliderObj->Position = -(aabbElipse.Size / 2);
+	physicObject->addChild(colliderObj);
+
+	auto collider = unique_ptr< Collider<AABB> >(new Collider<AABB>(physicObject, aabbElipse));
+
+	auto rigidbody = unique_ptr< Rigidbody >(new Rigidbody(physicObject, settings.Mass, move(collider)));
+	rigidbody->addVelocity(settings.VelocityVector);
+	physicObject->addComponent(move(rigidbody));
+
+
+	// ground collider
+	auto groundPlaneObj = make_shared< WorldObject >();
+	_world.addChild(groundPlaneObj);
+
+	auto ySize = 1000;
+	auto groundBB = AABB{ Point2d(windowSize.x, ySize) };
+
+	auto aabbGround = unique_ptr< Collider<AABB> >(new Collider<AABB>(groundPlaneObj, groundBB));
+	groundPlaneObj->addComponent(move(aabbGround));
+
+	groundPlaneObj->Position = Point2d(-60 , -ySize);
+
 
 	// creating objects to be tracked by engine
 	auto yAxisEngine = make_shared< WorldObject >();
@@ -25,20 +128,12 @@ Simulation::Simulation( Point2d windowSize )
 	auto xAxisEngine = make_shared< WorldObject >();
 	_world.addChild( xAxisEngine );
 
-	auto startEllipse = make_shared< WorldObject >();
-	startEllipse->Name = "ELLIPSE";
-	startEllipse->Position = Point2d( 0, _world.getPhysicProperties().MeterToPixel *10 );
-	_world.addChild(startEllipse);
-
 	// creating renderable axises
 	auto yLineRender = make_shared< Line >(Point2d(0, windowSize.y - 110), RGB(34, 87, 21), yAxisEngine);
 	_renderables.push_back( yLineRender );
 
 	auto xLineRender = make_shared< Line >(Point2d(windowSize.x - 130, 0), RGB(19, 28, 89), xAxisEngine);
 	_renderables.push_back(xLineRender);
-
-	auto startRenderer = make_shared< Render::Ellipse >(Point2d(40, 40), RGB(160, 18, 21), startEllipse );
-	_renderables.push_back(startRenderer);
 
 
 	// helper struct for rendering grid properties 
@@ -89,38 +184,12 @@ Simulation::Simulation( Point2d windowSize )
 		notch.NotchObj->Position = Point2d(props.MeterToPixel * i, -notchLength / 2.f);
 		notch.TextObj->Position = Point2d(-notchLength - 10, notch.LineRend->getHeight());
 	}
-
-
-	
-	auto aabbElipse = AABB{ Point2d(40, 40) };
-
-	auto colliderObj = make_shared< WorldObject >();
-	colliderObj->Position = -(aabbElipse.Size / 2);
-	startEllipse->addChild(colliderObj);
-
-	auto collider = unique_ptr< Collider<AABB> >(new Collider<AABB>(startEllipse, aabbElipse));
-	//colliderObj->addComponent(move(collider));
-
-
-	auto rigidbody = unique_ptr< Rigidbody >(new Rigidbody(startEllipse, 1.f, move(collider) ));
-	rigidbody->addVelocity(Point2d(10, 0));
-	startEllipse->addComponent(move(rigidbody));
-	
-
-	auto ySize = 50;
-	auto groundPlaneObj = make_shared< WorldObject >();
-	groundPlaneObj->Position = Point2d( -60, -ySize );
-	_world.addChild(groundPlaneObj);
-
-	auto groundBB = AABB{ Point2d(windowSize.x, ySize) };
-	auto aabbGround = unique_ptr< Collider<AABB> >(new Collider<AABB>(groundPlaneObj, groundBB));
-	groundPlaneObj->addComponent( move(aabbGround) );
 }
 
 void Simulation::run( HWND window, std::shared_ptr<bool> run )
 {
 	auto lastUpdate = chrono::system_clock::now();
-	auto updateTime = 1 / 30.0; // 60 fps
+	auto updateTime = 1 / 30.0; // fps
 
 	while ( *run.get() )
 	{

@@ -9,6 +9,10 @@
 
 namespace Engine
 {
+	/*
+		tree hierarchy structure with a type-safe children
+		holds such geometry properties as position and local axises
+	*/
 	template< class TChildren >
 	struct Object
 	{
@@ -22,6 +26,7 @@ namespace Engine
 		Children getChildren();
 		ParentPtr getParent();
 
+		// converts local position to world's
 		Point2d getWorldPosition(Point2d localPosition = Point2d::Zero );
 
 		Point2d getLocalAxises();
@@ -69,12 +74,6 @@ namespace Engine
 		onChildAdded( child );
 	};
 
-	
-	template< class TChild >
-	typename Object<TChild>::ParentPtr Object<TChild>::getParent()
-	{
-		return _parent;
-	};
 
 	template< class TChild >
 	void Object< TChild >::removeChild(ChildPtr child)
@@ -102,6 +101,13 @@ namespace Engine
 	};
 
 	
+	template< class TChild >
+	typename Object<TChild>::ParentPtr Object<TChild>::getParent()
+	{
+		return _parent;
+	};
+
+
 	template< class TChild >
 	Point2d Object<TChild>::getWorldPosition(Point2d offset)
 	{

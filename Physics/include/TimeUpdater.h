@@ -9,6 +9,9 @@
 
 namespace Engine
 {
+	/*
+		main engine loop, with update subscription
+	*/
 	struct PHYS_API TimeUpdater
 	{
 		void update();

@@ -46,15 +46,4 @@ namespace Engine
 
 		world->getUpdater().unregisterUpdate(_updateCallback);
 	}
-
-	MoveUp::MoveUp(ObjPtr obj)
-	: UpdatableComponent( obj )
-	{
-	}
-
-	void MoveUp::update(float dt)
-	{
-		auto posDelta = dt * 50;
-		Object.lock()->Position = Object.lock()->Position + Point2d(0, posDelta);
-	}
 }

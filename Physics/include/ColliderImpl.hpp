@@ -56,6 +56,7 @@ namespace Engine
 		auto pair = std::make_pair(lhs, rhs);
 		if (inCollision)
 		{
+			// this collision was already detected
 			if (trackingSet.find(pair) != trackingSet.end())
 			{
 				if ( lhs->_listener != nullptr )
@@ -63,7 +64,7 @@ namespace Engine
 				if ( rhs->_listener != nullptr )
 					rhs->_listener->onStayInCollision( Point2d::Zero );
 			}
-			else
+			else // new collision
 			{
 				trackingSet.insert( pair );
 
@@ -73,10 +74,11 @@ namespace Engine
 					rhs->_listener->onCollisionStart(Point2d::Zero);
 			}
 		}
-		else
+		else 
 		{
 			auto iter = trackingSet.find(pair);
 			
+			// collision was detected but now it's over
 			if (iter != trackingSet.end())
 			{
 				if (lhs->_listener != nullptr)

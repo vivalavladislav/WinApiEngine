@@ -60,8 +60,8 @@ namespace Render
 		auto pen = CreatePen(PS_SOLID, 8, Color);
 		SelectObject(hdc, pen);
 
-		auto bottom = WorldObj->getWorldPosition( -_size / 2.f);
-		auto top = WorldObj->getWorldPosition(_size / 2.f);
+		auto bottom = WorldObj->getWorldPosition();
+		auto top = WorldObj->getWorldPosition(_size);
 
 		::Ellipse( hdc, bottom.x, bottom.y, top.x, top.y );
 

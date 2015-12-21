@@ -30,7 +30,8 @@ namespace Engine
 		{
 			return;
 		}
-
+		
+		// notify components and children that they are added to world 
 		_world = world;
 		
 		for (auto& component : _components)

@@ -16,34 +16,42 @@ namespace Engine
 
 		auto obj = Object.lock();
 		auto props = obj->getWorld()->getPhysicProperties();
-		_velocity = _velocity + props.Gravity * _mass * dt;
-		
 
-		if (_friction)
+		if (!_inCollision)
 		{
+			// use gravity when object isn't colliding
+			_velocity = _velocity + props.Gravity * _mass * dt;
+		}
+
+		if (_inCollision)
+		{
+			// friction 
 			_velocity.x -= _velocity.x * dt;
 		}
-		// converting physical velocity to meters
-		_lastPosAdded = _velocity / props.PixelToMeter * dt;
-		obj->Position = obj->Position + _lastPosAdded;
+
+		// converting meters to pixels
+		obj->Position = obj->Position + _velocity / props.PixelToMeter * dt;;
 	}
 
-	void Rigidbody::addVelocity(Point2d velocity)
+	void Rigidbody::addVelocity(Point2d metersPerSecond)
 	{
-		_velocity = _velocity + velocity;
+		_velocity = _velocity + metersPerSecond;
 	}
 
 
 	void Rigidbody::onCollisionStart(Point2d collision)
 	{
-		_friction = true;
-		_velocity.y = -_velocity.y/2;
+		_inCollision = true;
+		if (abs(_velocity.y) > 0.02f)
+			_velocity.y = -_velocity.y / 2;
+		else
+			_velocity.y = 0.f;
 	}
 
 
 	void Rigidbody::onCollisionEnd()
 	{
-		_friction = false;
+		_inCollision = false;
 	}
 
 }

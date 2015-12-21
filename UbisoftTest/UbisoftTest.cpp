@@ -2,10 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "UbisoftTest.h"
+#include "Simulation.h"
 #include <iostream>
-#include "Rigidbody.h"
-#include "Renderable.h"
 #include <thread>
 
 using namespace std;
@@ -58,19 +56,19 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_UBISOFTTEST));
 
-	/*AllocConsole();
+	/*
+	AllocConsole();
 	freopen("CONIN$", "r", stdin);
 	freopen("CONOUT$", "w", stdout);
 	freopen("CONOUT$", "w", stderr);
 	*/
+
 	auto run = make_shared< bool >(true);
+	// start a trea for engine simulation
 	thread simulationLoop(std::bind(&Simulation::run, &simulation, hWnd, run));
 
-	// Main message loop:
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
-	//	simulation.getWorld().update();
-
 		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 		{
 			TranslateMessage(&msg);
@@ -85,11 +83,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 
 
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
+
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEX wcex;
@@ -111,21 +105,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClassEx(&wcex);
 }
 
-//
-//   FUNCTION: InitInstance(HINSTANCE, int)
-//
-//   PURPOSE: Saves instance handle and creates main window
-//
-//   COMMENTS:
-//
-//        In this function, we save the instance handle in a global variable and
-//        create and display the main program window.
-//
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // Store instance handle in our global variable
-
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+   hInst = hInstance;
+   
+   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME,
       0, 0, Width, Height, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
@@ -140,34 +124,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 }
 
 
-void DrawBall(HWND hWnd, HDC hWinDC )
-{
-	PAINTSTRUCT ps;
-	auto hdc = BeginPaint(hWnd, &ps);
-
-	auto bitmap = LoadImage(hInst, _T("ball.png"), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	if (bitmap == nullptr)
-	{
-		cout << "load failed " << endl;
-		return;
-	}
-
-	auto localDc = CreateCompatibleDC(hWinDC);
-	
-	EndPaint(hWnd, &ps);
-}
-
-
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE:  Processes messages for the main window.
-//
 //  WM_COMMAND	- process the application menu
 //  WM_PAINT	- Paint the main window
 //  WM_DESTROY	- post a quit message and return
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
@@ -178,7 +137,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
-		// Parse the menu selections:
 		switch (wmId)
 		{
 		case IDM_ABOUT:

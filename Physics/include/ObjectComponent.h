@@ -9,6 +9,10 @@ namespace Engine
 	struct World;
 	struct WorldObject;
 
+	/*
+		Component hierarchy for object. 
+		Components are designed to be a puzzle-like constructable parts for object sut-up
+	*/
 	struct PHYS_API IComponent
 	{
 		typedef std::weak_ptr< WorldObject > ObjPtr;
@@ -38,12 +42,6 @@ namespace Engine
 		FuncPtr _updateCallback;
 	};
 
-	struct PHYS_API MoveUp : public UpdatableComponent
-	{
-		MoveUp( ObjPtr );
-
-		virtual void update(float dt);
-	};
 }
 
 #endif // _OBJECT_COMPONENT_H_

@@ -12,6 +12,9 @@
 namespace Engine
 {
 	
+	/*
+		Event must be used in place, but for sake of development's speed delegates are used 
+	*/
 	struct ColliderListener
 	{
 		virtual void onCollisionStart(Point2d collisionVector){};
@@ -26,6 +29,10 @@ namespace Engine
 	struct World;
 	struct CollisionController;
 
+	/*
+		Colliders were designed to be tightly coupled with a their shape for compile-time collision detection procedures
+		But that produced highly complex Collision Controller code which must be refactored 
+	*/
 	template < class TShape >
 	struct Collider : public IComponent
 	{
@@ -53,6 +60,12 @@ namespace Engine
 		
 		void update(float dt);
 
+		// adds compile time support for shape
+		// a set of colliders with the shape is added and a set of tracking collisions
+		// 
+		// problem : for a new shape support there should be manually added a number of procedures to check a collision with other shape
+		// another problem: detection loop must be updated with a new code to check collisions 
+		// feature : this kind of design excluded casts and provided compile-time safety for collision support
 #define SHAPE_SUPPORT(Shape, Name, TrackingName)\
 	private:\
 	std::set< std::pair< Collider<Shape>*, Collider<Shape>* > > TrackingName;\
@@ -81,6 +94,7 @@ namespace Engine
 		SHAPE_SUPPORT(AABB, _aabbs, _aabbsTracked );
 
 	private:		
+		// controlls collision states, sends events to delegates and updates containers
 		template< class TLShape, class TRShape >
 		void trackCollisionState( Collider<TLShape>* lhs, Collider<TRShape>* rhs, 
 			std::set< std::pair<Collider<TLShape>*, Collider<TRShape>*> >& trackingSet,

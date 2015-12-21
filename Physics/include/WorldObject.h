@@ -8,6 +8,10 @@
 
 namespace Engine
 {
+	/*
+		A fundamental class for an engine
+		Encapsulates geometric properties together with hiearachy-tree and component model 
+	*/
 	struct World;
 	struct PHYS_API WorldObject : public Object< WorldObject >
 	{

@@ -3,7 +3,6 @@
 
 #include "PhysicsDll.h"
 
-//#include "ObjectComponent.h"
 #include "Colliders.h"
 #include "Point2d.h"
 #include "Colliders.h"
@@ -12,6 +11,12 @@
 namespace Engine
 {
 
+	/*
+		Component which emulates physic body. Mass and velocity properties are presented
+		Encapsulates a collider in place of construction for collision haldling
+
+		A gravity influence is handled here
+	*/
 	struct PHYS_API Rigidbody : public UpdatableComponent, public ColliderListener
 	{
 		template< class TColliderShape >
@@ -22,13 +27,12 @@ namespace Engine
 		virtual void onCollisionStart(Point2d collisionVector);
 		virtual void onCollisionEnd();
 
-		void addVelocity( Point2d velocity );
+		void addVelocity( Point2d metersPerSecond );
 
 	private:
 		Point2d _velocity;
 		float _mass;
-		Point2d _lastPosAdded;
-		bool _friction = false ;
+		bool _inCollision = false ;
 	};
 
 	template< class TColliderShape >
