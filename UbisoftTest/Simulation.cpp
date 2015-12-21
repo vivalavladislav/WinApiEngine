@@ -12,8 +12,10 @@ using namespace std;
 
 struct Settings
 {
+	float PixelsInMeter = 20;
 	float Mass;
 	Point2d StartPoint;
+	Point2d ObjectSize = Point2d(2,2);
 	Point2d VelocityVector;
 };
 
@@ -31,6 +33,11 @@ auto readSettings = []( string fileName )
 		{
 			auto index = strlen("mass:");
 			res.Mass = stof( line.substr(index).c_str() );
+		}
+		if (line.find("pixels_in_meter:") != -1)
+		{
+			auto index = strlen("pixels_in_meter:");
+			res.PixelsInMeter = stof(line.substr(index).c_str());
 		}
 		if (line.find("start_point") != -1)
 		{
@@ -66,34 +73,54 @@ auto readSettings = []( string fileName )
 				res.VelocityVector.y = stof(raw.substr(delim + 1));
 			}
 		}
+		if (line.find("object_size_in_meters:") != -1)
+		{
+			auto len = strlen("object_size_in_meters:");
+			string raw = line.substr(len);
+
+			auto delim = strlen(raw.c_str());
+			if (raw.find(','))
+			{
+				delim = raw.find(',');
+			}
+
+			res.ObjectSize.x = stof(raw.substr(0, delim));
+			if (delim != strlen(raw.c_str()))
+			{
+				res.ObjectSize.y = stof(raw.substr(delim + 1));
+			}
+		}
 	}
 	return res;
 };
 
+Settings settings = readSettings("./settings.txt");
 
 Simulation::Simulation( Point2d windowSize )
 // 20 pixels is one meter
-: _world(PhysicProperties{ 1/20.f })
+: _world(PhysicProperties{ 1/ settings.PixelsInMeter })
 {
 	auto settings = readSettings("./settings.txt");
+	auto props = _world.getPhysicProperties();
+
 
 	_world.Position = Point2d( 60, windowSize.y - 100 );
 	// swap y axis to make a standart look
 	_world.setLocalAxises(Point2d(1, -1));
-
-
+	
 
 	// setting up physic object, it's components and renderable object
 	auto physicObject = make_shared< WorldObject >();
 	physicObject->Name = "ELLIPSE";
-	physicObject->Position = settings.StartPoint * _world.getPhysicProperties().MeterToPixel;
+	physicObject->Position = settings.StartPoint * props.MeterToPixel;
 	_world.addChild(physicObject);
 
-
-	auto physicRnd = make_shared< Render::Ellipse >(Point2d(40, 40), RGB(160, 18, 21), physicObject);
+	auto sizeInPixels = settings.ObjectSize * props.MeterToPixel;
+	auto physicRnd = make_shared< Render::Ellipse >(sizeInPixels, RGB(160, 18, 21), physicObject);
 	_renderables.push_back(physicRnd);
 
-	auto aabbElipse = AABB{ Point2d(40, 40) };
+	// must be switched to physic coordinates
+	auto aabbElipse = AABB{ sizeInPixels };
 
 	// physicObject's Position is center of AABB, thus we create an object for follider to be placed in 
 	// correct position
@@ -161,7 +188,6 @@ Simulation::Simulation( Point2d windowSize )
 	};
 
 	// y notches
-	auto props = _world.getPhysicProperties();
 	int yNumber = yLineRender->getOffset().y * props.MeterToPixel;
 	for (auto i = 1; i < yNumber; i += 20)
 	{
