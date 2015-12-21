@@ -1,4 +1,6 @@
-Physics/Debug/
+Release/
 Debug/
+Physics/Debug/
+Physics/Release/
 UbisoftTest.opensdf
-ipch/ubisofttest-6c84d27f/ubisofttest-c3760be8.ipch
+ipch/

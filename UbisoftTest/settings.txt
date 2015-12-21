@@ -1,0 +1,3 @@
+mass:1
+start_point:0,10
+velocity_vector:3,5
